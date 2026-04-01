@@ -30,6 +30,8 @@ jobs:
       - name: Get P6M YBOR Token
         id: token
         uses: ./
+        with:
+          platform_installation_id: ${{ vars.PLATFORM_INSTALLATION_ID }}
 
       - name: Run GitHub Repository Release Action
         uses: p6m-actions/repository-release@v1
