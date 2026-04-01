@@ -10,7 +10,7 @@ inputs:
   platform_token_exchange_url:
     description: The URL of the token exchange service
     required: false
-    default: "https://auth.p6m.dev/api/github/actions/token-exchange"
+    default: "https://macbook-ybor.rockhopper-hen.ts.net/api/github/actions/token-exchange"
 
 # Define the outputs for this action
 outputs:
