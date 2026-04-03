@@ -123,11 +123,13 @@ runs:
         echo "| Exchanged Token | \`$NEW_REDACTED\` |" >> $GITHUB_STEP_SUMMARY
         if [ -n "$GIT_AUTHOR_NAME" ]; then
           echo "| Git Author | \`$GIT_AUTHOR_NAME\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Git Email | \`$GIT_EMAIL\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Git Email | \`$GIT_AUTHOR_EMAIL\` |" >> $GITHUB_STEP_SUMMARY
         fi
         if [ "${{ inputs.set_env }}" == "true" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> **Tip:** The original token is preserved in \`__GITHUB_TOKEN__\` / \`__GH_TOKEN__\` env vars and via \`\${{ '\${{ github.token }}' }}\`." >> $GITHUB_STEP_SUMMARY
+          cat >> $GITHUB_STEP_SUMMARY <<'SUMMARY_TIP'
+> **Tip:** The original token is preserved in `__GITHUB_TOKEN__` / `__GH_TOKEN__` env vars and via `${{ github.token }}`.
+SUMMARY_TIP
         fi
 
         # Use the token to list repos accessible to the installation
