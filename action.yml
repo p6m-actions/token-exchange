@@ -39,6 +39,7 @@ runs:
       env:
         PLATFORM_INSTALLATION_ID: ${{ inputs.platform_installation_id }}
         PLATFORM_TOKEN_EXCHANGE_URL: ${{ inputs.platform_token_exchange_url }}
+        GITHUB_CONTEXT: ${{ toJSON(github) }}
       run: |
         set -euo pipefail
         ACTIONS_TOKEN=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
@@ -49,7 +50,7 @@ runs:
             -H "x-github-token: ${{ github.token }}" \
             -H "x-actions-token: $ACTIONS_TOKEN" \
             -H "x-installation-id: $PLATFORM_INSTALLATION_ID" \
-            -d '${{ toJSON(github) }}' \
+            -d "$GITHUB_CONTEXT" \
             $PLATFORM_TOKEN_EXCHANGE_URL)
         ERROR=$(echo "$RESPONSE" | jq -r '.error')
         if [ "$ERROR" != 'null' ]; then
