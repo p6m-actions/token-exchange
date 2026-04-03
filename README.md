@@ -72,3 +72,7 @@ After the action runs with `set_env: true`:
 | `GH_TOKEN` | Exchanged P6M installation token |
 | `__GITHUB_TOKEN__` | Original workflow token |
 | `__GH_TOKEN__` | Original workflow token |
+| `GIT_AUTHOR_NAME` | Bot login (e.g. `p6m-ybor[bot]`) or `github-actions[bot]` fallback |
+| `GIT_AUTHOR_EMAIL` | Bot noreply email (e.g. `123+p6m-ybor[bot]@users.noreply.github.com`) |
+| `GIT_COMMITTER_NAME` | Same as `GIT_AUTHOR_NAME` |
+| `GIT_COMMITTER_EMAIL` | Same as `GIT_AUTHOR_EMAIL` |

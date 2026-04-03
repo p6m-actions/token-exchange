@@ -71,6 +71,31 @@ runs:
         echo "GITHUB_TOKEN=${{ steps.p6m-ybor.outputs.token }}" >> $GITHUB_ENV
         echo "GH_TOKEN=${{ steps.p6m-ybor.outputs.token }}" >> $GITHUB_ENV
 
+    - name: Set GIT identity
+      if: inputs.set_env == 'true'
+      shell: bash {0}
+      env:
+        GH_TOKEN: ${{ steps.p6m-ybor.outputs.token }}
+      run: |
+        # Try to resolve bot identity from the exchanged token
+        USER_JSON=$(gh api /user 2>/dev/null) || true
+        BOT_LOGIN=$(echo "$USER_JSON" | jq -r '.login // empty' 2>/dev/null)
+        BOT_ID=$(echo "$USER_JSON" | jq -r '.id // empty' 2>/dev/null)
+
+        if [ -n "$BOT_LOGIN" ] && [ -n "$BOT_ID" ]; then
+          GIT_NAME="$BOT_LOGIN"
+          GIT_EMAIL="${BOT_ID}+${BOT_LOGIN}@users.noreply.github.com"
+        else
+          # Fallback to standard github-actions bot
+          GIT_NAME="github-actions[bot]"
+          GIT_EMAIL="41898282+github-actions[bot]@users.noreply.github.com"
+        fi
+
+        echo "GIT_AUTHOR_NAME=$GIT_NAME" >> $GITHUB_ENV
+        echo "GIT_AUTHOR_EMAIL=$GIT_EMAIL" >> $GITHUB_ENV
+        echo "GIT_COMMITTER_NAME=$GIT_NAME" >> $GITHUB_ENV
+        echo "GIT_COMMITTER_EMAIL=$GIT_EMAIL" >> $GITHUB_ENV
+
     - name: Show Summary
       if: inputs.show_summary == 'true'
       shell: bash {0}
@@ -96,6 +121,9 @@ runs:
         echo "| Status | \`${{ steps.p6m-ybor.outputs.status }}\` |" >> $GITHUB_STEP_SUMMARY
         echo "| Original Token | \`$OLD_REDACTED\` |" >> $GITHUB_STEP_SUMMARY
         echo "| Exchanged Token | \`$NEW_REDACTED\` |" >> $GITHUB_STEP_SUMMARY
+        if [ -n "$GIT_AUTHOR_NAME" ]; then
+          echo "| Git Identity | \`$GIT_AUTHOR_NAME\` <\`$GIT_AUTHOR_EMAIL\`> |" >> $GITHUB_STEP_SUMMARY
+        fi
         if [ "${{ inputs.set_env }}" == "true" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "> **Tip:** The original token is preserved in \`__GITHUB_TOKEN__\` / \`__GH_TOKEN__\` env vars and via \`\${{ '\${{ github.token }}' }}\`." >> $GITHUB_STEP_SUMMARY
