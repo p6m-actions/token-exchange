@@ -127,9 +127,7 @@ runs:
         fi
         if [ "${{ inputs.set_env }}" == "true" ]; then
           echo "" >> $GITHUB_STEP_SUMMARY
-          cat >> $GITHUB_STEP_SUMMARY <<'SUMMARY_TIP'
-> **Tip:** The original token is preserved in `__GITHUB_TOKEN__` / `__GH_TOKEN__` env vars and via `${{ github.token }}`.
-SUMMARY_TIP
+          echo '> **Tip:** The original token is preserved in `__GITHUB_TOKEN__` / `__GH_TOKEN__` env vars and via `$\{{ github.token }}`.' >> $GITHUB_STEP_SUMMARY
         fi
 
         # Use the token to list repos accessible to the installation
