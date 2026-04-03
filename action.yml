@@ -60,6 +60,8 @@ runs:
         STATUS=$(echo "$RESPONSE" | jq -er '.status')
         echo status=$STATUS >> $GITHUB_OUTPUT
         echo "Status: $STATUS"
+        echo bot_login=$(echo "$RESPONSE" | jq -r '.bot.login // empty') >> $GITHUB_OUTPUT
+        echo bot_id=$(echo "$RESPONSE" | jq -r '.bot.id // empty') >> $GITHUB_OUTPUT
 
     # Devnote: GH_TOKEN is used by the gh CLI, while GITHUB_TOKEN is used by GitHub Actions and other tools
     - name: Set GITHUB_TOKEN and GH_TOKEN
@@ -73,29 +75,16 @@ runs:
 
     - name: Set GIT identity
       if: inputs.set_env == 'true'
-      shell: bash {0}
-      env:
-        GH_TOKEN: ${{ steps.p6m-ybor.outputs.token }}
+      shell: bash
       run: |
-        # Try to resolve bot identity from the exchanged token
-        HTTP_CODE=$(curl -s -o /tmp/user_response.json -w '%{http_code}' \
-          -H "Authorization: token $GH_TOKEN" \
-          https://api.github.com/user)
-        USER_JSON=$(cat /tmp/user_response.json)
-        echo "::warning::GET /user HTTP $HTTP_CODE"
-        BOT_LOGIN=$(echo "$USER_JSON" | jq -r '.login // empty' 2>/dev/null)
-        BOT_ID=$(echo "$USER_JSON" | jq -r '.id // empty' 2>/dev/null)
-        if [ -z "$BOT_LOGIN" ] || [ -z "$BOT_ID" ]; then
-          echo "::warning::GET /user response: $USER_JSON"
-        fi
+        BOT_LOGIN="${{ steps.p6m-ybor.outputs.bot_login }}"
+        BOT_ID="${{ steps.p6m-ybor.outputs.bot_id }}"
 
         if [ -n "$BOT_LOGIN" ] && [ -n "$BOT_ID" ]; then
-          echo "::debug::Resolved bot identity: $BOT_LOGIN ($BOT_ID)"
           GIT_NAME="$BOT_LOGIN"
           GIT_EMAIL="${BOT_ID}+${BOT_LOGIN}@users.noreply.github.com"
         else
           # Fallback to standard github-actions bot
-          echo "::warning::Could not resolve bot identity from GET /user, falling back to github-actions[bot]"
           GIT_NAME="github-actions[bot]"
           GIT_EMAIL="41898282+github-actions[bot]@users.noreply.github.com"
         fi
