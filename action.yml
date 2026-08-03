@@ -72,7 +72,10 @@ runs:
           echo "Error: $ERROR"
           exit 1
         fi
-        echo token=$(echo "$RESPONSE" | jq -er '.token') >> $GITHUB_OUTPUT
+        TOKEN=$(echo "$RESPONSE" | jq -er '.token')
+        # Mask before the value can reach any log — it is a live installation token.
+        echo "::add-mask::$TOKEN"
+        echo "token=$TOKEN" >> $GITHUB_OUTPUT
         STATUS=$(echo "$RESPONSE" | jq -er '.status')
         echo status=$STATUS >> $GITHUB_OUTPUT
         echo "Status: $STATUS"
@@ -94,7 +97,10 @@ runs:
         git config --global user.name "p6m-ybor[bot]"
         git config --global user.email "184961816+p6m-ybor[bot]@users.noreply.github.com"
         git config --local --unset-all http.https://github.com/.extraheader 2>/dev/null || true
-        git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n "x-access-token:${{ steps.p6m-ybor.outputs.token }}" | base64)"
+        # tr -d '\n' is required: GNU base64 wraps at 76 columns, which for any token
+        # longer than 42 chars yields a multi-line header value that curl refuses to
+        # send. Not `base64 -w0` — -w is GNU-only and absent on BSD/macOS/BusyBox.
+        git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n "x-access-token:${{ steps.p6m-ybor.outputs.token }}" | base64 | tr -d '\n')"
 
     # Prevent workflow loops when pushing with an app token by prepending
     # [skip ci] to every commit message via a prepare-commit-msg hook.
