@@ -43,6 +43,9 @@ runs:
       env:
         PLATFORM_INSTALLATION_ID: ${{ inputs.platform_installation_id }}
         PLATFORM_TOKEN_EXCHANGE_URL: ${{ inputs.platform_token_exchange_url }}
+        # Audience the exchange service accepts, so the token can't be replayed
+        # at another relying party. One value for every stage (YP6M-4572).
+        TOKEN_AUDIENCE: https%3A%2F%2Fauth.p6m.dev
         GITHUB_CONTEXT: ${{ toJSON(github) }}
       run: |
         set -euo pipefail
@@ -58,7 +61,7 @@ runs:
           exit 1
         fi
         ACTIONS_TOKEN=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-          "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -er '.value')
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${TOKEN_AUDIENCE}" | jq -er '.value')
 
         RESPONSE=$(curl -X POST \
             -H "Content-Type: application/vnd.p6m.github-context+json" \

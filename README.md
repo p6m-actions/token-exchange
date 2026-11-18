@@ -6,6 +6,8 @@
 
 Exchanges a GitHub Actions OIDC token for a P6M YBOR installation token. This action handles the token exchange flow needed to authenticate with P6M platform services from GitHub Actions workflows.
 
+The OIDC token is requested with the audience `https://auth.p6m.dev`, so it is valid only at the token exchange service, in every stage.
+
 When `set_env` is enabled (the default), the action overwrites `GITHUB_TOKEN` and `GH_TOKEN` in the environment with the exchanged token. The original workflow token is preserved in `__GITHUB_TOKEN__` and `__GH_TOKEN__`, and is always available via `${{ github.token }}` which is immutable.
 
 ## Usage
